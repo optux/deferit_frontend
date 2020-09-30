@@ -15,8 +15,6 @@ class BillDetailsView extends Component {
     this.props.updateTooltipText(status);
   };
 
-  _renderTooltip = () => {};
-
   render() {
     const {bills} = this.props;
     const bill = bills.fetchedList.find((item) => item.id === bills.selectedId);

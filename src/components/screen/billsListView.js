@@ -31,6 +31,8 @@ export class BillsListView extends Component {
     this.props.getBillsList();
   }
 
+  // when the user pulls down the flatlist
+  // it reloads the current page
   _onPageRefresh = () => {
     const {loading, page} = this.props.bills;
     if (!loading) {
@@ -38,21 +40,27 @@ export class BillsListView extends Component {
     }
   };
 
+  // when the scrolling motion passes the threshold
+  // it fetches the next page if there are any
   _onEndReached = ({distanceFromEnd}) => {
     const {page} = this.props.bills;
     this.props.getBillsList(page + 1);
   };
 
+  // when the user presses on the thumbnail image
+  // it updates the bill id (pk) and the push the
+  // screen to the bill details screen
   _onThumbnailPress = (id) => {
     this.props.updateBillSelection(id);
     Actions.push('billDetails');
   };
 
+  // this will update the Tooltip Text.
   _showTooltip = (status = null) => {
     this.props.updateTooltipText(status);
-    this.setState({tooltipVisible: true});
   };
 
+  // this renders each bill inside a card
   _renderBill = ({item}, index) => {
     const {due_date, amount, status} = item;
     const dueDate = new Date(due_date);
@@ -113,6 +121,7 @@ export class BillsListView extends Component {
     );
   };
 
+  // the main rendering function
   _renderBillsList = () => {
     const {loading, fetchedList} = this.props.bills;
     return (
