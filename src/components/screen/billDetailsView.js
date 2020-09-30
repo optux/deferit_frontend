@@ -24,6 +24,7 @@ class BillDetailsView extends Component {
       <View style={styles.billContainer}>
         <Card style={styles.cardContainer}>
           <Card.Title>{description}</Card.Title>
+          {/* while the image is loading, activity indicator will be visiable */}
           <Image
             style={styles.image}
             source={{uri: original_url}}
