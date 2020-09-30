@@ -10,8 +10,8 @@ import {
 } from '../constants';
 
 /*
- *  This function retrieves the customer's the bills list using axios
- *  and then dispatches corresponding actions.
+ *  This function retrieves the customer's bills list using axios
+ *  and then dispatches a corresponding action.
  *  Omitted the api authentication token for now.
  */
 export const getBillsList = (page = 1) => {
