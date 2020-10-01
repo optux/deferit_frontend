@@ -12,10 +12,11 @@ At the moment, there are 23 records in total in the database and it is paginated
 When your scrolling motion reaches the threshold, the app will continually fetch the next batch of records if there are any.
 
 As the newer release build for Android won't work with the clear text HTTP, I have to forward you the debug build this time. 
-Otherwise, I have to spend anoher hour or so to setup SSL certificate with Nginx on the testing server, which is pointless at this time. I apology for the large file size.
+Otherwise, I have to spend anoher hour or so to setup SSL certificate with Nginx on the testing server, which is pointless 
+at this time. I apology for the large file size.
 
 Even though the dummy data look the same, all pictures are live data from 'placeholder.com'.
 
 You can install the apk with adb install app-debug.apk command.
 
-Thanks.
+Thanks for reading.
