@@ -7,6 +7,7 @@ import {
   RefreshControl,
   TouchableHighlight,
   StyleSheet,
+  ToastAndroid,
 } from 'react-native';
 import {Actions} from 'react-native-router-flux';
 import {connect} from 'react-redux';
@@ -17,6 +18,8 @@ import {
   getBillsList,
   updateBillSelection,
   updateTooltipText,
+  updateLastViewableRecord,
+  resetBillsError,
 } from './../../actions';
 
 export class BillsListView extends Component {
@@ -24,12 +27,38 @@ export class BillsListView extends Component {
     super();
     this.state = {
       isDataFetching: false,
+      lastViewableRecord: -1,
     };
   }
 
+  // react life-cycle methods
   componentDidMount() {
     this.props.getBillsList();
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    // when 80% of the last record becomes viewable
+    // display a toast message to notify that end of the list has been reached
+    if (
+      this.props.bills.error &&
+      prevState.lastViewableRecord !== this.state.lastViewableRecord &&
+      this.state.lastViewableRecord === this.props.bills.fetchedList.length
+    ) {
+      this._showToastErrorMsg();
+    }
+  }
+
+  _showToastErrorMsg = () => {
+    ToastAndroid.showWithGravityAndOffset(
+      this.props.bills.error,
+      ToastAndroid.LONG,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+    // reset the error record to show toast only once
+    setTimeout(() => this.props.resetBillsError(), ToastAndroid.LONG);
+  };
 
   // when the user pulls down the flatlist
   // it reloads the current page
@@ -43,8 +72,11 @@ export class BillsListView extends Component {
   // when the scrolling motion passes the threshold
   // it fetches the next page if there are any
   _onEndReached = ({distanceFromEnd}) => {
-    const {page} = this.props.bills;
-    this.props.getBillsList(page + 1);
+    const {page, endReached} = this.props.bills;
+    console.log('_onEndReached');
+    if (!endReached) {
+      this.props.getBillsList(page + 1);
+    }
   };
 
   // when the user presses on the thumbnail image
@@ -58,6 +90,16 @@ export class BillsListView extends Component {
   // this will update the Tooltip Text.
   _showTooltip = (status = null) => {
     this.props.updateTooltipText(status);
+  };
+
+  // this callback function is used to show the
+  // end of the bills list has been reached
+  // that is no more records to display
+  _onViewableItemsChanged = ({viewableItems}) => {
+    // get the key of the last element of the viewableItems
+    this.setState({
+      lastViewableRecord: parseInt(viewableItems[viewableItems.length - 1].key),
+    });
   };
 
   // this renders each bill inside a card
@@ -83,7 +125,7 @@ export class BillsListView extends Component {
               />
             </TouchableHighlight>
           </View>
-          <View style={{flex: 4, flexDirection: 'row', alignItems: 'center'}}>
+          <View style={[styles.detailsContainer, {flex: 4}]}>
             <View style={{flex: 3}}>
               <Text style={styles.text}>Due Date:</Text>
               <Text style={styles.text}>Amount:</Text>
@@ -94,7 +136,7 @@ export class BillsListView extends Component {
                 {dueDate.toLocaleDateString('en-GB')}
               </Text>
               <Text style={styles.text}>{`$ ${amount}`}</Text>
-              <View style={styles.detailContainer}>
+              <View style={styles.statusContainer}>
                 <Tooltip
                   skipAndroidStatusBar
                   popover={
@@ -141,8 +183,10 @@ export class BillsListView extends Component {
               refreshing={this.state.isDataFetching}
             />
           }
-          onEndReachedThreshold={0.75}
+          onEndReachedThreshold={0.8}
           onEndReached={this._onEndReached}
+          viewabilityConfig={{itemVisiblePercentThreshold: 80}}
+          onViewableItemsChanged={this._onViewableItemsChanged}
         />
         {loading && <ActivityIndicator />}
       </View>
@@ -223,7 +267,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     paddingLeft: 8,
   },
-  detailContainer: {
+  detailsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusContainer: {
     flexDirection: 'row',
   },
   text: {
@@ -242,6 +290,7 @@ const mapDispatchToProps = (dispatch) => {
     getBillsList: (page) => dispatch(getBillsList(page)),
     updateBillSelection: (id) => dispatch(updateBillSelection(id)),
     updateTooltipText: (status) => dispatch(updateTooltipText(status)),
+    resetBillsError: () => dispatch(resetBillsError()),
   };
 };
 

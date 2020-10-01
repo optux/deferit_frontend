@@ -7,9 +7,6 @@ import {connect} from 'react-redux';
 import {updateTooltipText} from './../../actions';
 
 class BillDetailsView extends Component {
-
-  // when the user presses the status
-  // updates the tooltip text
   _onStatusPress = (status) => {
     this.props.updateTooltipText(status);
   };

@@ -1,12 +1,15 @@
 import axios from 'axios';
 import {
   URL_BILLS_LIST_API,
-  GET_BILLS_LIST,
-  GET_BILLS_LIST_SUCCESS,
-  GET_BILLS_LIST_FAILURE,
+  SET_BILLS_LIST_STARTED,
+  SET_BILLS_LIST_SUCCESS,
+  SET_BILLS_LIST_FAILURE,
+  SET_BILLS_LIST_END_REACHED,
   UPDATE_BILL_SELECTION,
   UPDATE_TOOLTIP_TEXT,
+  RESET_BILLS_ERROR,
   STATUS,
+  END_OF_LIST_MSG,
 } from '../constants';
 
 /*
@@ -16,7 +19,7 @@ import {
  */
 export const getBillsList = (page = 1) => {
   return (dispatch, getState) => {
-    dispatch(getBillsListStarted());
+    dispatch(setBillsListStarted());
     const prevFetchedList = getState().bills.fetchedList;
     const billsListQueryUrl = `${URL_BILLS_LIST_API}?page=${page}`;
     axios
@@ -31,28 +34,39 @@ export const getBillsList = (page = 1) => {
             ) === -1,
         );
         // then dispatch additional data
-        dispatch(getBillsListSuccess(uniqueData, page));
+        dispatch(setBillsListSuccess(uniqueData, page));
       })
       .catch((err) => {
-        dispatch(getBillsListFailure(err.message));
+        console.log('getBillsList', err);
+        // should use a specific code for the end of records error
+        if (err.message.includes(404)) {
+          dispatch(setBillsListEndReached(END_OF_LIST_MSG));
+        } else {
+          dispatch(setBillsListFailure(err.message));
+        }
       });
   };
 };
 
-const getBillsListStarted = () => ({
-  type: GET_BILLS_LIST,
+const setBillsListStarted = () => ({
+  type: SET_BILLS_LIST_STARTED,
 });
 
-const getBillsListSuccess = (bills, page) => ({
-  type: GET_BILLS_LIST_SUCCESS,
+const setBillsListSuccess = (bills, page) => ({
+  type: SET_BILLS_LIST_SUCCESS,
   payload: {
     bills: [...bills],
     page,
   },
 });
 
-const getBillsListFailure = (error) => ({
-  type: GET_BILLS_LIST_FAILURE,
+const setBillsListFailure = (error) => ({
+  type: SET_BILLS_LIST_FAILURE,
+  payload: error,
+});
+
+const setBillsListEndReached = (error) => ({
+  type: SET_BILLS_LIST_END_REACHED,
   payload: error,
 });
 
@@ -87,6 +101,14 @@ export const updateTooltipText = (status) => {
     dispatch({
       type: UPDATE_TOOLTIP_TEXT,
       payload: tooltipText,
+    });
+  };
+};
+
+export const resetBillsError = () => {
+  return (dispatch) => {
+    dispatch({
+      type: RESET_BILLS_ERROR,
     });
   };
 };
