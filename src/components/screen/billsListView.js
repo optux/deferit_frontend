@@ -121,7 +121,7 @@ export class BillsListView extends Component {
     );
   };
 
-  // the main rendering function
+  // this function returns the bills list using FlatList
   _renderBillsList = () => {
     const {loading, fetchedList} = this.props.bills;
     return (
@@ -149,6 +149,7 @@ export class BillsListView extends Component {
     );
   };
 
+  // the main rendering function
   render() {
     const {bills} = this.props;
     return (
